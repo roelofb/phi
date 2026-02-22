@@ -174,6 +174,33 @@ describe("createLocalSandbox", () => {
   });
 });
 
+describe("assertPathConfined", () => {
+  test("rejects sibling-prefix bypass", async () => {
+    const { assertPathConfined } = await import("../src/util/path.js");
+    // /tmp/root2 should NOT be considered confined to /tmp/root
+    expect(() => assertPathConfined("/tmp/root2/file", "/tmp/root")).toThrow(
+      /path confinement/i,
+    );
+  });
+
+  test("allows path within root", async () => {
+    const { assertPathConfined } = await import("../src/util/path.js");
+    expect(() => assertPathConfined("/tmp/root/sub/file", "/tmp/root")).not.toThrow();
+  });
+
+  test("allows root itself", async () => {
+    const { assertPathConfined } = await import("../src/util/path.js");
+    expect(() => assertPathConfined("/tmp/root", "/tmp/root")).not.toThrow();
+  });
+
+  test("rejects parent traversal", async () => {
+    const { assertPathConfined } = await import("../src/util/path.js");
+    expect(() => assertPathConfined("/tmp/root/../other", "/tmp/root")).toThrow(
+      /path confinement/i,
+    );
+  });
+});
+
 describe("createDaytonaSandbox", () => {
   test("throws not yet implemented", async () => {
     await expect(

@@ -10,13 +10,15 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "oxlint src/ contracts/ tests/ blueprints/"
+    "lint": "oxlint src/ contracts/ tests/ blueprints/",
+    "harness": "tsx src/cli.ts"
   },
   "packageManager": "pnpm@10.30.1",
   "devDependencies": {
     "@types/node": "^25.3.0",
     "@typescript/native-preview": "7.0.0-dev.20260222.1",
     "oxlint": "^1.49.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   },

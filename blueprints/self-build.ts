@@ -1,3 +1,5 @@
+import { writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import {
   blueprint,
   preflight,
@@ -5,13 +7,54 @@ import {
   agentic,
   validate,
 } from "../src/blueprint/dsl.js";
+import { assertPathConfined } from "../src/util/path.js";
+import { TRUNCATION_MARKER } from "../src/util/sanitize.js";
 import type { Blueprint } from "../src/blueprint/types.js";
 
 export const selfBuild: Blueprint = blueprint(
   "self-build",
   "Build a feature from a product spec: read spec → plan → implement → validate → commit",
   [
-    preflight("check-tools", "Verify git and pnpm are available", async (_ctx, sandbox) => {
+    preflight("check-tools", "Verify git, pnpm, and spec file", async (ctx, sandbox) => {
+      // Validate sandboxType
+      if (ctx.sandboxType !== "local") {
+        return {
+          status: "failure",
+          output: "",
+          durationMs: 0,
+          error: `self-build requires sandboxType "local", got "${ctx.sandboxType}"`,
+        };
+      }
+
+      // Validate specPath
+      if (!ctx.specPath) {
+        return {
+          status: "failure",
+          output: "",
+          durationMs: 0,
+          error: "specPath is required for self-build blueprint",
+        };
+      }
+
+      // Path traversal check
+      assertPathConfined(resolve(ctx.workDir, ctx.specPath), ctx.workDir);
+
+      // Verify spec file exists in sandbox
+      const specCheck = await sandbox.exec({
+        argv: ["test", "-f", ctx.specPath],
+        cwd: sandbox.workDir,
+        timeout: 5_000,
+      });
+      if (specCheck.exitCode !== 0) {
+        return {
+          status: "failure",
+          output: "",
+          durationMs: specCheck.durationMs,
+          error: `Spec file not found in sandbox: ${ctx.specPath}`,
+        };
+      }
+
+      // Verify tools
       const git = await sandbox.exec({
         argv: ["git", "--version"],
         cwd: sandbox.workDir,
@@ -25,8 +68,8 @@ export const selfBuild: Blueprint = blueprint(
       const ok = git.exitCode === 0 && pnpm.exitCode === 0;
       return {
         status: ok ? "success" : "failure",
-        output: `git: ${git.stdout.trim()}, pnpm: ${pnpm.stdout.trim()}`,
-        durationMs: git.durationMs + pnpm.durationMs,
+        output: `git: ${git.stdout.trim()}, pnpm: ${pnpm.stdout.trim()}, spec: ${ctx.specPath}`,
+        durationMs: specCheck.durationMs + git.durationMs + pnpm.durationMs,
         error: ok ? undefined : "Required tools not available",
       };
     }),
@@ -50,7 +93,7 @@ export const selfBuild: Blueprint = blueprint(
       prompt: (ctx) =>
         [
           `Read docs/ARCHITECTURE.md for project invariants and conventions.`,
-          `Read the product spec: ${ctx.intent}`,
+          `Read the product spec at: ${ctx.specPath}`,
           `Read existing src/ and contracts/ code for interfaces already defined.`,
           `Plan the implementation. List files to create/modify and the approach.`,
           `Do NOT write code yet — only plan.`,
@@ -63,7 +106,7 @@ export const selfBuild: Blueprint = blueprint(
         const plan = ctx.results["plan"]?.output ?? "";
         return [
           `Read docs/ARCHITECTURE.md for project invariants.`,
-          `Read the product spec: ${ctx.intent}`,
+          `Read the product spec at: ${ctx.specPath}`,
           `Read existing src/ and contracts/ code.`,
           `Based on this plan:\n${plan}`,
           `Generate the implementation and tests according to the spec.`,
@@ -114,12 +157,57 @@ export const selfBuild: Blueprint = blueprint(
           const output = ctx.results["validate"]?.output ?? "";
           return [
             `Validation failed. Output:\n${output}`,
-            `Read the spec again: ${ctx.intent}`,
+            `Read the spec again at: ${ctx.specPath}`,
             `Fix the failures. Run pnpm typecheck && pnpm test to verify.`,
           ].join("\n");
         },
       }),
       maxRetries: 2,
+    }),
+
+    deterministic("export-patch", "Export diff to host filesystem", async (ctx, sandbox) => {
+      const diff = await sandbox.exec({
+        argv: ["git", "diff", "HEAD"],
+        cwd: sandbox.workDir,
+        timeout: 30_000,
+        maxOutput: 10_000_000,
+      });
+
+      if (diff.exitCode !== 0) {
+        return {
+          status: "failure",
+          output: diff.stderr,
+          durationMs: diff.durationMs,
+          error: "git diff failed",
+        };
+      }
+
+      // Truncation guard: don't write partial patches
+      if (diff.stdout.endsWith(TRUNCATION_MARKER)) {
+        return {
+          status: "failure",
+          output: "",
+          durationMs: diff.durationMs,
+          error: "Diff output was truncated — refusing to write partial patch",
+        };
+      }
+
+      if (!diff.stdout.trim()) {
+        return {
+          status: "success",
+          output: "No changes to export",
+          durationMs: diff.durationMs,
+        };
+      }
+
+      const patchPath = `${resolve(ctx.repo)}/harness-patch-${ctx.runId}.diff`;
+      await writeFile(patchPath, diff.stdout, "utf-8");
+
+      return {
+        status: "success",
+        output: `Patch exported to: ${patchPath}`,
+        durationMs: diff.durationMs,
+      };
     }),
 
     deterministic("commit", "Commit the implementation", async (ctx, sandbox) => {
@@ -133,7 +221,7 @@ export const selfBuild: Blueprint = blueprint(
           "git",
           "commit",
           "-m",
-          `feat: implement from spec\n\nSpec: ${ctx.intent}\nHarness run: ${ctx.runId}`,
+          `feat: implement from spec\n\nSpec: ${ctx.specPath ?? ctx.intent}\nHarness run: ${ctx.runId}`,
         ],
         cwd: sandbox.workDir,
         timeout: 10_000,

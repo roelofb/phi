@@ -46,6 +46,7 @@ function baseContext(): RunContext {
     push: false,
     env: {},
     results: {},
+    sandboxType: "local",
   };
 }
 
@@ -280,7 +281,78 @@ describe("validate node", () => {
       sandbox: mockSandbox(),
       agentExecutor: mockAgent(),
     });
-    expect(report.nodes[0]!.status).toBe("failure");
+    const checkNode = report.nodes.find((n) => n.name === "check");
+    expect(checkNode!.status).toBe("failure");
+    // onFailure result also present in report
+    const fixNode = report.nodes.find((n) => n.name === "fix");
+    expect(fixNode).toBeDefined();
+  });
+});
+
+describe("onFailure visibility", () => {
+  test("onFailure result emitted via onNodeComplete", async () => {
+    const completed: Array<{ name: string; status: string }> = [];
+    let callCount = 0;
+    const bp = blueprint("test", "test", [
+      validate("check", "validate", {
+        steps: [
+          {
+            name: "test",
+            exec: async () => {
+              callCount++;
+              if (callCount <= 1) {
+                return { status: "failure", output: "fail", durationMs: 1, error: "bad" };
+              }
+              return { status: "success", output: "ok", durationMs: 1 };
+            },
+          },
+        ],
+        onFailure: agentic("fix", "fix", {
+          agent: "claude-code",
+          prompt: () => "fix it",
+        }),
+      }),
+    ]);
+    await executeBlueprint(bp, baseContext(), {
+      sandbox: mockSandbox(),
+      agentExecutor: mockAgent(),
+      onNodeComplete: (name, result) => completed.push({ name, status: result.status }),
+    });
+    // onFailure "fix" should have been emitted
+    expect(completed.some((c) => c.name === "fix")).toBe(true);
+    // validate "check" should also be emitted
+    expect(completed.some((c) => c.name === "check")).toBe(true);
+  });
+
+  test("onFailure result present in RunReport.nodes", async () => {
+    let callCount = 0;
+    const bp = blueprint("test", "test", [
+      validate("check", "validate", {
+        steps: [
+          {
+            name: "test",
+            exec: async () => {
+              callCount++;
+              if (callCount <= 1) {
+                return { status: "failure", output: "fail", durationMs: 1, error: "bad" };
+              }
+              return { status: "success", output: "ok", durationMs: 1 };
+            },
+          },
+        ],
+        onFailure: agentic("fix", "fix", {
+          agent: "claude-code",
+          prompt: () => "fix it",
+        }),
+      }),
+    ]);
+    const report = await executeBlueprint(bp, baseContext(), {
+      sandbox: mockSandbox(),
+      agentExecutor: mockAgent(),
+    });
+    // Both "fix" (onFailure) and "check" (validate) should be in nodes
+    expect(report.nodes.some((n) => n.name === "fix")).toBe(true);
+    expect(report.nodes.some((n) => n.name === "check")).toBe(true);
   });
 });
 

@@ -13,6 +13,8 @@ export interface AgentExecutor {
 export interface EngineOptions {
   sandbox: Sandbox;
   agentExecutor: AgentExecutor;
+  /** Called when a node begins execution */
+  onNodeStart?: (name: string, type: string) => void;
   /** Called after each node completes */
   onNodeComplete?: (name: string, result: NodeResult) => void;
 }
@@ -40,7 +42,8 @@ export async function executeBlueprint(
       continue;
     }
 
-    const result = await executeNode(node, ctx, opts);
+    opts.onNodeStart?.(node.name, node.type);
+    const result = await executeNode(node, ctx, opts, nodeResults);
     nodeResults.push({ name: node.name, ...result });
     ctx.results[node.name] = result;
     opts.onNodeComplete?.(node.name, result);
@@ -71,6 +74,7 @@ async function executeNode(
   node: AnyNode,
   ctx: RunContext,
   opts: EngineOptions,
+  nodeResults: Array<{ name: string } & NodeResult>,
 ): Promise<NodeResult> {
   switch (node.type) {
     case "preflight":
@@ -80,7 +84,7 @@ async function executeNode(
     case "agentic":
       return opts.agentExecutor.execute(node, ctx, opts.sandbox);
     case "validate":
-      return executeValidateNode(node, ctx, opts);
+      return executeValidateNode(node, ctx, opts, nodeResults);
   }
 }
 
@@ -88,6 +92,7 @@ async function executeValidateNode(
   node: Extract<AnyNode, { type: "validate" }>,
   ctx: RunContext,
   opts: EngineOptions,
+  parentResults: Array<{ name: string } & NodeResult>,
 ): Promise<NodeResult> {
   const maxRetries = node.maxRetries ?? 2;
 
@@ -127,8 +132,20 @@ async function executeValidateNode(
       };
     }
 
+    // Store intermediate validate output so onFailure prompt can reference it
+    ctx.results[node.name] = {
+      status: "failure",
+      output: stepResults.map((r) => r.output).join("\n"),
+      durationMs: stepResults.reduce((sum, r) => sum + r.durationMs, 0),
+      error: stepResults.find((r) => r.status === "failure")?.error,
+    };
+
     // Run onFailure agentic to try to fix
-    await opts.agentExecutor.execute(node.onFailure, ctx, opts.sandbox);
+    const fixResult = await opts.agentExecutor.execute(node.onFailure, ctx, opts.sandbox);
+    // Store, emit, and append onFailure result
+    ctx.results[node.onFailure.name] = fixResult;
+    opts.onNodeComplete?.(node.onFailure.name, fixResult);
+    parentResults.push({ name: node.onFailure.name, ...fixResult });
   }
 
   // Unreachable, but TypeScript needs it

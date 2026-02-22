@@ -217,3 +217,4 @@ pnpm test        # Unit + integration tests
 - [The Phoenix Architecture](https://aicoding.leaflet.pub) — Regenerative software principles
 - [Minions: Stripe's Coding Agents](https://stripe.dev/blog/minions-stripes-one-shot-end-to-end-coding-agents-part-2) — Production unattended agents
 - [Trillion Dollar AI Dev Stack (a16z)](https://a16z.com/the-trillion-dollar-ai-software-development-stack/) — Ecosystem overview
+- [Improving Deep Agents with Harness Engineering (LangChain)](https://blog.langchain.com/improving-deep-agents-with-harness-engineering/) — Scaffolding for deep agent reliability

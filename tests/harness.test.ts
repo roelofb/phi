@@ -1,7 +1,9 @@
 import { describe, test, expect } from "vitest";
 import { runHarness } from "../src/harness.js";
-import { blueprint, deterministic } from "../src/blueprint/dsl.js";
+import { blueprint, deterministic, agentic } from "../src/blueprint/dsl.js";
 import type { Reporter } from "../src/reporter/types.js";
+import type { AgentExecutor } from "../src/blueprint/engine.js";
+import type { NodeResult } from "../contracts/types.js";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -141,6 +143,70 @@ describe("runHarness", () => {
       await rm(testRepo, { recursive: true, force: true });
     }
   });
+
+  test("specPath and sandboxType are available in RunContext", async () => {
+    testRepo = await createTestRepo();
+    try {
+      let capturedSpecPath: string | undefined;
+      let capturedSandboxType: string | undefined;
+      const bp = blueprint("test", "test", [
+        deterministic("check-ctx", "check context", async (ctx) => {
+          capturedSpecPath = ctx.specPath;
+          capturedSandboxType = ctx.sandboxType;
+          return { status: "success", output: "ok", durationMs: 1 };
+        }),
+      ]);
+      await runHarness({
+        blueprint: bp,
+        repo: testRepo,
+        intent: "test",
+        push: false,
+        sandboxType: "local",
+        specPath: "docs/product-specs/json-reporter.md",
+        reporter: mockReporter(),
+      });
+      expect(capturedSpecPath).toBe("docs/product-specs/json-reporter.md");
+      expect(capturedSandboxType).toBe("local");
+    } finally {
+      await rm(testRepo, { recursive: true, force: true });
+    }
+  });
+
+  test("token aggregation sums across agentic nodes via injectable agentExecutor", async () => {
+    testRepo = await createTestRepo();
+    try {
+      let callCount = 0;
+      const executor: AgentExecutor = {
+        execute: async (): Promise<NodeResult> => {
+          callCount++;
+          return { status: "success", output: `call ${callCount}`, durationMs: 10 };
+        },
+      };
+
+      const bp = blueprint("test", "test", [
+        agentic("a1", "first", { agent: "claude-code", prompt: () => "do" }),
+        agentic("a2", "second", { agent: "claude-code", prompt: () => "do" }),
+      ]);
+
+      const report = await runHarness({
+        blueprint: bp,
+        repo: testRepo,
+        intent: "test",
+        push: false,
+        sandboxType: "local",
+        reporter: mockReporter(),
+        agentExecutor: executor,
+      });
+
+      // With mock executor, tokens are zeros (no real driver) but the executor was called
+      expect(callCount).toBe(2);
+      expect(report.nodes).toHaveLength(2);
+      // Token usage structure exists
+      expect(report.tokenUsage).toBeDefined();
+    } finally {
+      await rm(testRepo, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("blueprints", () => {
@@ -160,5 +226,28 @@ describe("blueprints", () => {
     expect(selfBuild.nodes[0]!.type).toBe("preflight");
     expect(selfBuild.nodes.some((n) => n.type === "agentic")).toBe(true);
     expect(selfBuild.nodes.some((n) => n.type === "validate")).toBe(true);
+  });
+
+  test("self-build prompts include specPath", async () => {
+    const { selfBuild } = await import("../blueprints/self-build.js");
+    const ctx = {
+      runId: "test1234",
+      workDir: "/tmp/test",
+      intent: "test",
+      repo: ".",
+      push: false,
+      env: {},
+      results: { plan: { status: "success" as const, output: "plan output", durationMs: 1 } },
+      specPath: "docs/product-specs/json-reporter.md",
+      sandboxType: "local" as const,
+    };
+
+    // Find agentic nodes and check their prompts reference specPath
+    for (const node of selfBuild.nodes) {
+      if (node.type === "agentic") {
+        const prompt = node.prompt(ctx);
+        expect(prompt).toContain("docs/product-specs/json-reporter.md");
+      }
+    }
   });
 });

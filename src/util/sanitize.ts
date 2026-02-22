@@ -47,9 +47,12 @@ export function redact(output: string, env: Record<string, string>): string {
   return result;
 }
 
-/** Truncate output to maxBytes, appending "[truncated]" if exceeded */
+/** Sentinel appended when output is truncated */
+export const TRUNCATION_MARKER = "[truncated]";
+
+/** Truncate output to maxBytes, appending marker if exceeded */
 export function truncate(output: string, maxBytes: number): string {
   const buf = Buffer.from(output, "utf-8");
   if (buf.length <= maxBytes) return output;
-  return buf.subarray(0, maxBytes).toString("utf-8") + "\n[truncated]";
+  return buf.subarray(0, maxBytes).toString("utf-8") + "\n" + TRUNCATION_MARKER;
 }

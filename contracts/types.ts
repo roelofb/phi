@@ -14,6 +14,10 @@ export interface RunContext {
   env: Record<string, string>;
   /** Accumulated results from previous nodes, keyed by node name */
   results: Record<string, NodeResult>;
+  /** Path to product spec file (repo-relative) */
+  specPath?: string;
+  /** Sandbox implementation in use */
+  sandboxType: "local" | "daytona";
 }
 
 /** Outcome of a single node execution */

@@ -5,17 +5,8 @@ import { join, resolve, dirname } from "node:path";
 import { randomBytes } from "node:crypto";
 import type { ExecOptions, ExecResult } from "../../contracts/types.js";
 import type { Sandbox, SandboxOptions } from "./types.js";
-import { MAX_OUTPUT_BYTES } from "../util/sanitize.js";
-import { truncate } from "../util/sanitize.js";
-
-function assertPathConfined(candidate: string, root: string): void {
-  const resolved = resolve(candidate);
-  if (!resolved.startsWith(root)) {
-    throw new Error(
-      `Path confinement violation: "${candidate}" resolves outside sandbox root "${root}"`,
-    );
-  }
-}
+import { MAX_OUTPUT_BYTES, truncate } from "../util/sanitize.js";
+import { assertPathConfined } from "../util/path.js";
 
 function execFilePromise(
   argv: string[],
