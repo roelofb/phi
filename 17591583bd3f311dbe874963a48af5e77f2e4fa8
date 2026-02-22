@@ -1,0 +1,61 @@
+todos/003-pending-p1-export-patch-host-write-unconfinement.md
+  1f956ab764f938b5 1-40
+todos/008-pending-p2-truncate-before-redact.md
+  1f956ab764f938b5 1-34
+todos/001-pending-p1-node-event-ordering-inversion.md
+  1f956ab764f938b5 1-39
+src/harness.ts
+  1f956ab764f938b5 101
+src/blueprint/engine.ts
+  1f956ab764f938b5 144
+tests/self-build.test.ts
+  1f956ab764f938b5 114-137
+todos/004-pending-p2-token-aggregation-split.md
+  1f956ab764f938b5 1-36
+todos/011-pending-p3-omit-noop-type.md
+  1f956ab764f938b5 1-28
+todos/006-pending-p2-pi-allowedtools-ignored.md
+  1f956ab764f938b5 1-38
+todos/013-pending-p2-codex-config-quote-injection.md
+  1f956ab764f938b5 1-35
+blueprints/self-build.ts
+  1f956ab764f938b5 203-206
+todos/010-pending-p3-driver-dispatch-ternary-chain.md
+  1f956ab764f938b5 1-29
+todos/005-pending-p2-duplicate-path-confinement.md
+  1f956ab764f938b5 1-33
+todos/012-pending-p3-codex-stderr-filtering-fragility.md
+  1f956ab764f938b5 1-33
+todos/007-pending-p2-codex-token-field-semantic.md
+  1f956ab764f938b5 1-36
+todos/014-pending-p2-intent-unredacted-in-run-complete.md
+  1f956ab764f938b5 1-30
+todos/015-pending-p2-claude-code-missing-maxoutput.md
+  1f956ab764f938b5 1-29
+todos/009-pending-p3-zero-token-constant.md
+  1f956ab764f938b5 1-28
+tests/blueprint-engine.test.ts
+  1f956ab764f938b5 357-391
+todos/002-pending-p1-onfailure-nodestart-asymmetry.md
+  1f956ab764f938b5 1-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "17591583bd3f311dbe874963a48af5e77f2e4fa8",
+  "prompts": {
+    "1f956ab764f938b5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79431f79-5862-4bc4-ab86-b525544f7c72",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Roelof Blom <roelof@rb2.nl>",
+      "messages": [],
+      "total_additions": 569,
+      "total_deletions": 5,
+      "accepted_lines": 566,
+      "overriden_lines": 0
+    }
+  }
+}
