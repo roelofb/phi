@@ -1,0 +1,27 @@
+src/agents/pi.ts
+  1f956ab764f938b5 5-6,17-22,24-27,29-32,37
+src/sandbox/local.ts
+  1f956ab764f938b5 49-51
+blueprints/self-build.ts
+  1f956ab764f938b5 92,104,155
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "d46ba8980447feb7c76d311629aeb9a17d067a2d",
+  "prompts": {
+    "1f956ab764f938b5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79431f79-5862-4bc4-ab86-b525544f7c72",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Roelof Blom <roelof@rb2.nl>",
+      "messages": [],
+      "total_additions": 24,
+      "total_deletions": 5,
+      "accepted_lines": 24,
+      "overriden_lines": 0
+    }
+  }
+}
