@@ -1,0 +1,85 @@
+src/sandbox/local.ts
+  201284f03391208c 1-169
+tests/sanitize.test.ts
+  201284f03391208c 1-161
+src/util/sanitize.ts
+  201284f03391208c 1-55
+src/blueprint/engine.ts
+  201284f03391208c 1-141
+src/cli.ts
+  201284f03391208c 1-144
+tests/harness.test.ts
+  201284f03391208c 1-164
+blueprints/self-build.ts
+  201284f03391208c 1-149
+docs/product-specs/agent-drivers.md
+  201284f03391208c 1-299
+tests/blueprint-engine.test.ts
+  201284f03391208c 1-335
+docs/product-specs/sandbox-manager.md
+  201284f03391208c 1-263
+vitest.config.ts
+  201284f03391208c 1-15
+src/reporter/console.ts
+  201284f03391208c 1-49
+src/util/preflight.ts
+  201284f03391208c 1-41
+tests/sandbox-local.test.ts
+  201284f03391208c 1-183
+docs/product-specs/blueprint-engine.md
+  201284f03391208c 1-327
+.gitignore
+  201284f03391208c 1-4
+blueprints/bug-fix.ts
+  201284f03391208c 1-125
+contracts/types.ts
+  201284f03391208c 1-66
+src/agents/pi.ts
+  201284f03391208c 1-67
+src/blueprint/types.ts
+  201284f03391208c 1-62
+tsconfig.json
+  201284f03391208c 1-33
+docs/product-specs/foundation-types.md
+  201284f03391208c 1-291
+src/sandbox/types.ts
+  201284f03391208c 1-33
+docs/product-specs/harness-cli.md
+  201284f03391208c 1-245
+src/harness.ts
+  201284f03391208c 1-86
+tests/agent-drivers.test.ts
+  201284f03391208c 1-304
+package.json
+  201284f03391208c 3-7,9-13
+src/blueprint/dsl.ts
+  201284f03391208c 1-70
+src/agents/types.ts
+  201284f03391208c 1-28
+src/agents/claude-code.ts
+  201284f03391208c 1-140
+src/reporter/types.ts
+  201284f03391208c 1-12
+src/sandbox/daytona.ts
+  201284f03391208c 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "2e55d76f7d557ad9869ae4e0d29c00f60b9f0fac",
+  "prompts": {
+    "201284f03391208c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7df4b921-ff7f-4845-8aa1-1c3fa0f158ec",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Roelof Blom <roelof@rb2.nl>",
+      "messages": [],
+      "total_additions": 4117,
+      "total_deletions": 17,
+      "accepted_lines": 4107,
+      "overriden_lines": 1
+    }
+  }
+}
