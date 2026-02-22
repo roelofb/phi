@@ -46,6 +46,9 @@ function execFilePromise(
         });
       },
     );
+    // Close stdin — sandbox commands are non-interactive.
+    // Without this, tools like `pi --print` block waiting on stdin.
+    child.stdin?.end();
     // Ensure cleanup on timeout
     child.on("error", () => {});
   });
