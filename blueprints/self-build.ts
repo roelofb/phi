@@ -200,7 +200,10 @@ export const selfBuild: Blueprint = blueprint(
         };
       }
 
-      const patchPath = `${resolve(ctx.repo)}/harness-patch-${ctx.runId}.diff`;
+      const repoDir = resolve(ctx.repo);
+      assertPathConfined(repoDir, repoDir); // validates resolve doesn't escape
+      const patchPath = `${repoDir}/harness-patch-${ctx.runId}.diff`;
+      assertPathConfined(patchPath, repoDir);
       await writeFile(patchPath, diff.stdout, "utf-8");
 
       return {

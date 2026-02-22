@@ -111,6 +111,30 @@ describe("self-build preflight", () => {
 });
 
 describe("self-build export-patch", () => {
+  test("patch path stays confined within repo dir", async () => {
+    const { selfBuild } = await import("../blueprints/self-build.js");
+    const exportNode = selfBuild.nodes.find((n) => n.name === "export-patch");
+    if (!exportNode || exportNode.type !== "deterministic") {
+      throw new Error("Expected deterministic export-patch node");
+    }
+
+    const sandbox = mockSandbox(async () => ({
+      exitCode: 0,
+      stdout: "diff --git a/file\n+added",
+      stderr: "",
+      durationMs: 1,
+      timedOut: false,
+    }));
+
+    // runId with enough traversal to escape repo dir
+    await expect(
+      exportNode.exec(
+        baseCtx({ specPath: "spec.md", runId: "x/../../../../tmp/evil" }),
+        sandbox,
+      ),
+    ).rejects.toThrow("Path confinement violation");
+  });
+
   test("truncation guard fails on truncated diff", async () => {
     const { selfBuild } = await import("../blueprints/self-build.js");
     const exportNode = selfBuild.nodes.find((n) => n.name === "export-patch");

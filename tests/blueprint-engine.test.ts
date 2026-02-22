@@ -354,6 +354,41 @@ describe("onFailure visibility", () => {
     expect(report.nodes.some((n) => n.name === "fix")).toBe(true);
     expect(report.nodes.some((n) => n.name === "check")).toBe(true);
   });
+
+  test("onNodeStart fires before onFailure execution", async () => {
+    const events: Array<{ type: "start" | "complete"; name: string }> = [];
+    let callCount = 0;
+    const bp = blueprint("test", "test", [
+      validate("check", "validate", {
+        steps: [
+          {
+            name: "test",
+            exec: async () => {
+              callCount++;
+              if (callCount <= 1) {
+                return { status: "failure", output: "fail", durationMs: 1, error: "bad" };
+              }
+              return { status: "success", output: "ok", durationMs: 1 };
+            },
+          },
+        ],
+        onFailure: agentic("fix", "fix", {
+          agent: "claude-code",
+          prompt: () => "fix it",
+        }),
+      }),
+    ]);
+    await executeBlueprint(bp, baseContext(), {
+      sandbox: mockSandbox(),
+      agentExecutor: mockAgent(),
+      onNodeStart: (name) => events.push({ type: "start", name }),
+      onNodeComplete: (name) => events.push({ type: "complete", name }),
+    });
+    const fixStart = events.findIndex((e) => e.type === "start" && e.name === "fix");
+    const fixComplete = events.findIndex((e) => e.type === "complete" && e.name === "fix");
+    expect(fixStart).toBeGreaterThanOrEqual(0);
+    expect(fixComplete).toBeGreaterThan(fixStart);
+  });
 });
 
 describe("DSL functions", () => {

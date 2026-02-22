@@ -95,10 +95,10 @@ export async function runHarness(opts: HarnessOptions): Promise<RunReport> {
         opts.reporter.nodeStart(name, type);
       },
       onNodeComplete: (name, result) => {
-        opts.reporter.nodeComplete(name, result);
         if (result.output) {
           opts.reporter.nodeOutput(name, result.output);
         }
+        opts.reporter.nodeComplete(name, result);
       },
     });
 

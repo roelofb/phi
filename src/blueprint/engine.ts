@@ -141,6 +141,7 @@ async function executeValidateNode(
     };
 
     // Run onFailure agentic to try to fix
+    opts.onNodeStart?.(node.onFailure.name, node.onFailure.type);
     const fixResult = await opts.agentExecutor.execute(node.onFailure, ctx, opts.sandbox);
     // Store, emit, and append onFailure result
     ctx.results[node.onFailure.name] = fixResult;
