@@ -1,0 +1,25 @@
+src/reporter/json.ts
+  89d7b8160d34ac6c 1-144
+tests/json-reporter.test.ts
+  89d7b8160d34ac6c 1-250
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "866a98741114778fbadf58cb8a76b274330ae0e3",
+  "prompts": {
+    "89d7b8160d34ac6c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019c8547-4854-7bc1-b87a-8009d02855b9",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "Roelof Blom <roelof@rb2.nl>",
+      "messages": [],
+      "total_additions": 394,
+      "total_deletions": 0,
+      "accepted_lines": 394,
+      "overriden_lines": 0
+    }
+  }
+}
