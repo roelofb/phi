@@ -1,4 +1,5 @@
 import type { AgentDriver, AgentResult, AgentOptions } from "./types.js";
+import { ZERO_TOKEN_USAGE } from "./types.js";
 import type { Sandbox } from "../sandbox/types.js";
 import type { TokenUsage } from "../../contracts/types.js";
 
@@ -18,6 +19,8 @@ export const BASE_ALLOWED_TOOLS: string[] = [
 ];
 
 const DEFAULT_TIMEOUT = 600_000;
+/** Claude Code with --output-format json can produce large structured output */
+const CLAUDE_MAX_OUTPUT = 10 * 1024 * 1024; // 10MB
 
 interface ClaudeJsonOutput {
   result?: string;
@@ -50,12 +53,7 @@ function parseClaudeOutput(stdout: string): {
   } catch {
     return {
       result: stdout,
-      tokenUsage: {
-        inputTokens: 0,
-        outputTokens: 0,
-        cacheReadTokens: 0,
-        cacheWriteTokens: 0,
-      },
+      tokenUsage: ZERO_TOKEN_USAGE,
     };
   }
 }
@@ -93,6 +91,7 @@ export function createClaudeCodeDriver(): AgentDriver {
         argv,
         cwd: sandbox.workDir,
         timeout,
+        maxOutput: CLAUDE_MAX_OUTPUT,
       });
 
       if (execResult.timedOut) {
@@ -101,12 +100,7 @@ export function createClaudeCodeDriver(): AgentDriver {
           output: execResult.stdout,
           durationMs: execResult.durationMs,
           error: "Agent timed out",
-          tokenUsage: {
-            inputTokens: 0,
-            outputTokens: 0,
-            cacheReadTokens: 0,
-            cacheWriteTokens: 0,
-          },
+          tokenUsage: ZERO_TOKEN_USAGE,
         };
       }
 
@@ -116,12 +110,7 @@ export function createClaudeCodeDriver(): AgentDriver {
           output: execResult.stdout,
           durationMs: execResult.durationMs,
           error: execResult.stderr || `Exit code ${execResult.exitCode}`,
-          tokenUsage: {
-            inputTokens: 0,
-            outputTokens: 0,
-            cacheReadTokens: 0,
-            cacheWriteTokens: 0,
-          },
+          tokenUsage: ZERO_TOKEN_USAGE,
         };
       }
 

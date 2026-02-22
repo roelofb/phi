@@ -29,6 +29,7 @@ interface RunCompleteEvent extends BaseEvent {
   event: "run_complete";
   runId: string;
   blueprint: string;
+  intent: string;
   totalDurationMs: number;
   tokenUsage: {
     inputTokens: number;
@@ -184,8 +185,8 @@ describe("createJsonReporter", () => {
   });
 
   test("path traversal segments are rejected", () => {
-    expect(() => createJsonReporter("../events.jsonl", {})).toThrow(/traversal/i);
-    expect(() => createJsonReporter("..\\events.jsonl", {})).toThrow(/traversal/i);
+    expect(() => createJsonReporter("../events.jsonl", {})).toThrow(/confinement/i);
+    expect(() => createJsonReporter("..\\events.jsonl", {})).toThrow(/confinement/i);
   });
 
   test("AC-9: all events include ISO 8601 timestamps", async () => {

@@ -1,8 +1,9 @@
 import { appendFileSync, statSync } from "node:fs";
-import { dirname, isAbsolute, relative, resolve } from "node:path";
+import { dirname, isAbsolute, resolve } from "node:path";
 import type { NodeResult, NodeStatus, RunReport, TokenUsage } from "../../contracts/types.js";
 import type { Reporter } from "./types.js";
 import { redact, truncate, MAX_OUTPUT_BYTES } from "../util/sanitize.js";
+import { assertPathConfined } from "../util/path.js";
 
 interface NodeStartEvent {
   event: "node_start";
@@ -28,6 +29,7 @@ interface RunCompleteEvent {
   event: "run_complete";
   runId: string;
   blueprint: string;
+  intent: string;
   totalDurationMs: number;
   tokenUsage: TokenUsage;
   nodeCount: number;
@@ -43,26 +45,15 @@ type JsonReporterEvent = JsonReporterEventPayload & {
   timestamp: string;
 };
 
-function hasTraversalSegment(inputPath: string): boolean {
-  return inputPath.split(/[\\/]+/).some((segment) => segment === "..");
-}
-
 function resolveReporterPath(filePath: string): string {
-  if (hasTraversalSegment(filePath)) {
-    throw new Error(`Invalid reporter path: traversal segments are not allowed: "${filePath}"`);
-  }
-
   const resolvedPath = resolve(filePath);
+
+  // Confine relative paths to cwd (prevents ../escape)
   if (!isAbsolute(filePath)) {
-    const cwd = resolve(process.cwd());
-    const rel = relative(cwd, resolvedPath);
-    if (rel.startsWith("..") || isAbsolute(rel)) {
-      throw new Error(
-        `Invalid reporter path: relative path resolves outside cwd "${cwd}": "${filePath}"`,
-      );
-    }
+    assertPathConfined(resolvedPath, process.cwd());
   }
 
+  // Verify parent directory exists and is a directory
   const parentDir = dirname(resolvedPath);
   let parentStats: ReturnType<typeof statSync>;
   try {
@@ -87,7 +78,7 @@ export function createJsonReporter(
   const resolvedPath = resolveReporterPath(filePath);
 
   function sanitize(text: string): string {
-    return truncate(redact(text, env), MAX_OUTPUT_BYTES);
+    return redact(truncate(text, MAX_OUTPUT_BYTES), env);
   }
 
   function append(event: JsonReporterEventPayload): void {
@@ -116,7 +107,7 @@ export function createJsonReporter(
     },
 
     nodeComplete(name: string, result: NodeResult): void {
-      const event: Omit<NodeCompleteEvent, "timestamp"> = {
+      const event: NodeCompleteEvent = {
         event: "node_complete",
         name,
         status: result.status,
@@ -135,6 +126,7 @@ export function createJsonReporter(
         event: "run_complete",
         runId: report.runId,
         blueprint: report.blueprint,
+        intent: redact(report.intent, env),
         totalDurationMs: report.totalDurationMs,
         tokenUsage: report.tokenUsage,
         nodeCount: report.nodes.length,

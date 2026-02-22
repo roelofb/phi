@@ -1,4 +1,5 @@
 import type { AgentDriver, AgentResult, AgentOptions } from "./types.js";
+import { ZERO_TOKEN_USAGE } from "./types.js";
 import type { Sandbox } from "../sandbox/types.js";
 
 const DEFAULT_TIMEOUT = 600_000;
@@ -27,10 +28,15 @@ export function createCodexDriver(): AgentDriver {
         "-C", sandbox.workDir,
       ];
 
-      // System prompt
+      // System prompt — escape embedded double quotes to prevent config injection
       if (options?.systemPrompt) {
-        argv.push("--config", `system_prompt="${options.systemPrompt}"`);
+        const escaped = options.systemPrompt.replace(/"/g, '\\"');
+        argv.push("--config", `system_prompt="${escaped}"`);
       }
+
+      // Codex uses --full-auto which grants all tools;
+      // allowedTools cannot be mapped — silently ignored
+      // (documented limitation of --full-auto mode)
 
       // Add the prompt
       argv.push(prompt);
@@ -49,33 +55,31 @@ export function createCodexDriver(): AgentDriver {
           output: execResult.stdout,
           durationMs: execResult.durationMs,
           error: "Agent timed out",
-          tokenUsage: { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 },
+          tokenUsage: ZERO_TOKEN_USAGE,
         };
       }
 
       if (execResult.exitCode !== 0) {
-        // Codex writes its banner to stderr even on success;
-        // strip it to surface only real error lines
-        const stderrLines = execResult.stderr
-          .split("\n")
-          .filter((l) => !l.startsWith("OpenAI Codex") && !l.startsWith("--------") && l.trim() !== "");
-        const errorMsg = stderrLines.join("\n") || `Exit code ${execResult.exitCode}`;
+        // Only use stderr for error message on non-zero exit;
+        // banner noise on success is harmless
+        const errorMsg = execResult.stderr.trim() || `Exit code ${execResult.exitCode}`;
         return {
           status: "failure",
           output: execResult.stdout,
           durationMs: execResult.durationMs,
           error: errorMsg,
-          tokenUsage: { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 },
+          tokenUsage: ZERO_TOKEN_USAGE,
         };
       }
 
+      // Codex reports total tokens (not split by input/output)
       const totalTokens = parseTokenCount(execResult.stdout);
       return {
         status: "success",
         output: execResult.stdout,
         durationMs: execResult.durationMs,
         tokenUsage: {
-          inputTokens: totalTokens,
+          inputTokens: totalTokens, // total — Codex CLI doesn't split input/output
           outputTokens: 0,
           cacheReadTokens: 0,
           cacheWriteTokens: 0,

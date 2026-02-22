@@ -65,25 +65,41 @@ export async function runHarness(opts: HarnessOptions): Promise<RunReport> {
       cacheWriteTokens: 0,
     };
 
-    const agentExecutor: AgentExecutor = opts.agentExecutor ?? {
+    const drivers: Record<string, typeof claudeDriver> = {
+      "claude-code": claudeDriver,
+      pi: piDriver,
+      codex: codexDriver,
+    };
+
+    const baseExecutor: AgentExecutor = opts.agentExecutor ?? {
       execute: async (
         node: AgenticNode,
         nodeCtx: RunContext,
         nodeSandbox: Sandbox,
       ): Promise<NodeResult> => {
-        const driver = node.agent === "pi" ? piDriver : node.agent === "codex" ? codexDriver : claudeDriver;
+        const driver = drivers[node.agent] ?? claudeDriver;
         const prompt = node.prompt(nodeCtx);
 
         const result: AgentResult = await driver.execute(nodeSandbox, prompt, {
           allowedTools: node.allowedTools,
         });
 
-        // Accumulate tokens from every agent call (including onFailure retries)
-        totalTokens.inputTokens += result.tokenUsage.inputTokens;
-        totalTokens.outputTokens += result.tokenUsage.outputTokens;
-        totalTokens.cacheReadTokens += result.tokenUsage.cacheReadTokens;
-        totalTokens.cacheWriteTokens += result.tokenUsage.cacheWriteTokens;
+        return result;
+      },
+    };
 
+    // Wrap any executor (including injected ones) with token accumulation
+    const agentExecutor: AgentExecutor = {
+      execute: async (node, nodeCtx, nodeSandbox) => {
+        const result = await baseExecutor.execute(node, nodeCtx, nodeSandbox);
+        // Accumulate tokens if the result carries tokenUsage (AgentResult)
+        const agentResult = result as Partial<AgentResult>;
+        if (agentResult.tokenUsage) {
+          totalTokens.inputTokens += agentResult.tokenUsage.inputTokens;
+          totalTokens.outputTokens += agentResult.tokenUsage.outputTokens;
+          totalTokens.cacheReadTokens += agentResult.tokenUsage.cacheReadTokens;
+          totalTokens.cacheWriteTokens += agentResult.tokenUsage.cacheWriteTokens;
+        }
         return result;
       },
     };

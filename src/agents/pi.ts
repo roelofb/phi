@@ -1,9 +1,13 @@
 import type { AgentDriver, AgentResult, AgentOptions } from "./types.js";
+import { ZERO_TOKEN_USAGE } from "./types.js";
 import type { Sandbox } from "../sandbox/types.js";
 
 const DEFAULT_TIMEOUT = 600_000;
 /** Pi streams tool calls to stdout; 50KB default is too small */
 const PI_MAX_OUTPUT = 10 * 1024 * 1024; // 10MB
+
+/** Pi only supports this fixed tool set via --tools */
+const PI_TOOLS = "read,bash,edit,write,grep,find,ls";
 
 export function createPiDriver(): AgentDriver {
   return {
@@ -16,9 +20,9 @@ export function createPiDriver(): AgentDriver {
     ): Promise<AgentResult> {
       const argv = ["pi", "--print", "--no-session"];
 
-      // Tools configuration
+      // Pi supports a fixed tool set — individual allowedTools values cannot be mapped
       if (options?.allowedTools?.length) {
-        argv.push("--tools", "read,bash,edit,write,grep,find,ls");
+        argv.push("--tools", PI_TOOLS);
       }
 
       // System prompt
@@ -43,12 +47,7 @@ export function createPiDriver(): AgentDriver {
           output: execResult.stdout,
           durationMs: execResult.durationMs,
           error: "Agent timed out",
-          tokenUsage: {
-            inputTokens: 0,
-            outputTokens: 0,
-            cacheReadTokens: 0,
-            cacheWriteTokens: 0,
-          },
+          tokenUsage: ZERO_TOKEN_USAGE,
         };
       }
 
@@ -58,12 +57,7 @@ export function createPiDriver(): AgentDriver {
           output: execResult.stdout,
           durationMs: execResult.durationMs,
           error: execResult.stderr || `Exit code ${execResult.exitCode}`,
-          tokenUsage: {
-            inputTokens: 0,
-            outputTokens: 0,
-            cacheReadTokens: 0,
-            cacheWriteTokens: 0,
-          },
+          tokenUsage: ZERO_TOKEN_USAGE,
         };
       }
 
@@ -71,12 +65,7 @@ export function createPiDriver(): AgentDriver {
         status: "success",
         output: execResult.stdout,
         durationMs: execResult.durationMs,
-        tokenUsage: {
-          inputTokens: 0,
-          outputTokens: 0,
-          cacheReadTokens: 0,
-          cacheWriteTokens: 0,
-        },
+        tokenUsage: ZERO_TOKEN_USAGE,
       };
     },
   };
