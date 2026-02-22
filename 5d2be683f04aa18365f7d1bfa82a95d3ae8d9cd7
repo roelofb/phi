@@ -1,0 +1,51 @@
+src/harness.ts
+  1f956ab764f938b5 1,3,11,25-26,54-55,58-66,74-77,79-83,85-87,92-93,97-99,103,106-107
+docs/solutions/security-issues/path-confinement-sibling-prefix-bypass-Sandbox-20260222.md
+  1f956ab764f938b5 1-86
+blueprints/self-build.ts
+  1f956ab764f938b5 1-2,10-11,18-57,71-72,96,109,160,168-210,224
+tests/blueprint-engine.test.ts
+  1f956ab764f938b5 49,284-288,292-355
+src/util/sanitize.ts
+  1f956ab764f938b5 50-53,57
+tests/self-build.test.ts
+  1f956ab764f938b5 1-136
+src/blueprint/engine.ts
+  1f956ab764f938b5 16-17,45-46,77,87,95,135-142,144-148
+docs/ARCHITECTURE.md
+  1f956ab764f938b5 220
+package.json
+  1f956ab764f938b5 13-14
+tests/sandbox-local.test.ts
+  1f956ab764f938b5 177-203
+contracts/types.ts
+  1f956ab764f938b5 17-20
+src/sandbox/local.ts
+  1f956ab764f938b5 8-9
+src/util/path.ts
+  1f956ab764f938b5 1-13
+docs/product-specs/json-reporter.md
+  1f956ab764f938b5 1-145
+tests/harness.test.ts
+  1f956ab764f938b5 3,5-6,146-205,230-251
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "5d2be683f04aa18365f7d1bfa82a95d3ae8d9cd7",
+  "prompts": {
+    "1f956ab764f938b5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79431f79-5862-4bc4-ab86-b525544f7c72",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Roelof Blom <roelof@rb2.nl>",
+      "messages": [],
+      "total_additions": 776,
+      "total_deletions": 75,
+      "accepted_lines": 740,
+      "overriden_lines": 0
+    }
+  }
+}
