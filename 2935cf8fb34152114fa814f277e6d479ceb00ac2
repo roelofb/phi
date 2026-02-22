@@ -1,0 +1,35 @@
+src/agents/types.ts
+  1f956ab764f938b5 4-11
+src/agents/claude-code.ts
+  1f956ab764f938b5 2,22-23,56,94,103,113
+src/agents/codex.ts
+  1f956ab764f938b5 2,31,33-34,37-40,58,63-65,71,75,82
+src/reporter/json.ts
+  1f956ab764f938b5 2,6,32,50-51,53,56,81,129
+src/harness.ts
+  1f956ab764f938b5 68-74,80,87-89,91-102
+tests/json-reporter.test.ts
+  1f956ab764f938b5 32,188-189
+src/agents/pi.ts
+  1f956ab764f938b5 2,9-11,23,25,50,60,68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "2935cf8fb34152114fa814f277e6d479ceb00ac2",
+  "prompts": {
+    "1f956ab764f938b5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79431f79-5862-4bc4-ab86-b525544f7c72",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Roelof Blom <roelof@rb2.nl>",
+      "messages": [],
+      "total_additions": 80,
+      "total_deletions": 81,
+      "accepted_lines": 76,
+      "overriden_lines": 0
+    }
+  }
+}
