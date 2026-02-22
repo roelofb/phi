@@ -89,7 +89,7 @@ export const selfBuild: Blueprint = blueprint(
     }),
 
     agentic("plan", "Read the spec and plan implementation", {
-      agent: "claude-code",
+      agent: "codex",
       prompt: (ctx) =>
         [
           `Read docs/ARCHITECTURE.md for project invariants and conventions.`,
@@ -101,7 +101,7 @@ export const selfBuild: Blueprint = blueprint(
     }),
 
     agentic("implement", "Generate code from spec", {
-      agent: "claude-code",
+      agent: "codex",
       prompt: (ctx) => {
         const plan = ctx.results["plan"]?.output ?? "";
         return [
@@ -152,7 +152,7 @@ export const selfBuild: Blueprint = blueprint(
         },
       ],
       onFailure: agentic("fix-failures", "Fix validation failures", {
-        agent: "claude-code",
+        agent: "codex",
         prompt: (ctx) => {
           const output = ctx.results["validate"]?.output ?? "";
           return [

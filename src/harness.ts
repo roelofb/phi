@@ -8,6 +8,7 @@ import { createLocalSandbox } from "./sandbox/local.js";
 import { createDaytonaSandbox } from "./sandbox/daytona.js";
 import { createClaudeCodeDriver } from "./agents/claude-code.js";
 import { createPiDriver } from "./agents/pi.js";
+import { createCodexDriver } from "./agents/codex.js";
 import type { AgentResult } from "./agents/types.js";
 import { generateRunId } from "./util/preflight.js";
 import { slugify } from "./util/sanitize.js";
@@ -42,6 +43,7 @@ export async function runHarness(opts: HarnessOptions): Promise<RunReport> {
   try {
     const claudeDriver = createClaudeCodeDriver();
     const piDriver = createPiDriver();
+    const codexDriver = createCodexDriver();
 
     const ctx: RunContext = {
       runId,
@@ -69,7 +71,7 @@ export async function runHarness(opts: HarnessOptions): Promise<RunReport> {
         nodeCtx: RunContext,
         nodeSandbox: Sandbox,
       ): Promise<NodeResult> => {
-        const driver = node.agent === "pi" ? piDriver : claudeDriver;
+        const driver = node.agent === "pi" ? piDriver : node.agent === "codex" ? codexDriver : claudeDriver;
         const prompt = node.prompt(nodeCtx);
 
         const result: AgentResult = await driver.execute(nodeSandbox, prompt, {

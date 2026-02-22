@@ -28,7 +28,7 @@ export interface DeterministicNode extends BlueprintNode {
 /** Agentic: invokes an AI agent for judgment calls */
 export interface AgenticNode extends BlueprintNode {
   type: "agentic";
-  agent: "claude-code" | "pi";
+  agent: "claude-code" | "pi" | "codex";
   prompt: (ctx: RunContext) => string;
   /** Additional tools to allow beyond the base set */
   allowedTools?: string[];
