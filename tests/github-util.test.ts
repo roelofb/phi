@@ -1,5 +1,21 @@
 import { describe, test, expect } from "vitest";
-import { parseGitHubRepo } from "../src/util/github.js";
+import { parseGitHubRepo, resolveRepoArg } from "../src/util/github.js";
+
+describe("resolveRepoArg", () => {
+  test("passes through owner/repo unchanged", async () => {
+    expect(await resolveRepoArg("acme/widgets")).toBe("acme/widgets");
+  });
+
+  test("passes through HTTPS URL unchanged", async () => {
+    expect(await resolveRepoArg("https://github.com/acme/widgets")).toBe("https://github.com/acme/widgets");
+  });
+
+  test("resolves '.' to GitHub remote", async () => {
+    // Running in this repo — should resolve to roelofb/phi
+    const result = await resolveRepoArg(".");
+    expect(result).toMatch(/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/);
+  });
+});
 
 describe("parseGitHubRepo", () => {
   test("org/repo shorthand", () => {
@@ -35,6 +51,14 @@ describe("parseGitHubRepo", () => {
 
   test("rejects extra path segments", () => {
     expect(() => parseGitHubRepo("acme/repo/tree/main")).toThrow(/expected exactly org\/repo/);
+  });
+
+  test("SSH URL", () => {
+    expect(parseGitHubRepo("git@github.com:acme/widgets.git")).toEqual({ owner: "acme", name: "widgets" });
+  });
+
+  test("SSH URL without .git suffix", () => {
+    expect(parseGitHubRepo("git@github.com:acme/widgets")).toEqual({ owner: "acme", name: "widgets" });
   });
 
   test("allows dots and hyphens in names", () => {

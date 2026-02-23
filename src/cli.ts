@@ -5,6 +5,7 @@ import { readdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { runHarness } from "./harness.js";
 import { createConsoleReporter } from "./reporter/console.js";
+import { resolveRepoArg } from "./util/github.js";
 import type { Blueprint } from "./blueprint/types.js";
 import type { DaytonaOptions } from "./sandbox/types.js";
 
@@ -92,9 +93,11 @@ const run = defineCommand({
       throw new Error(`Invalid sandbox type: "${sandboxType}" (expected: local, daytona)`);
     }
 
+    const repo = await resolveRepoArg(args.repo);
+
     const report = await runHarness({
       blueprint: bp,
-      repo: args.repo,
+      repo,
       intent: args.intent,
       push: args.push,
       sandboxType,

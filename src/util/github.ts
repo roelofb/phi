@@ -1,16 +1,49 @@
+import { execFile as execFileCb } from "node:child_process";
+import { promisify } from "node:util";
+import { resolve as resolvePath } from "node:path";
+
+const execFile = promisify(execFileCb);
 const GITHUB_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+
+function isLocalPath(repo: string): boolean {
+  return (
+    repo === "." ||
+    repo.startsWith("./") ||
+    repo.startsWith("..") ||
+    repo.startsWith("/") ||
+    repo.startsWith("~") ||
+    /^[A-Za-z]:/.test(repo)
+  );
+}
+
+/**
+ * If repo looks like a local path, resolve it to owner/repo via the
+ * git origin remote. Otherwise return it unchanged.
+ */
+export async function resolveRepoArg(repo: string): Promise<string> {
+  if (!isLocalPath(repo)) return repo;
+
+  const cwd = resolvePath(repo);
+  const { stdout } = await execFile("git", ["remote", "get-url", "origin"], { cwd });
+  const url = stdout.trim();
+  if (!url) {
+    throw new Error(`No git remote "origin" in ${cwd}`);
+  }
+  const { owner, name } = parseGitHubRepo(url);
+  return `${owner}/${name}`;
+}
 
 /** Parse a GitHub repo reference into owner and name. */
 export function parseGitHubRepo(repo: string): { owner: string; name: string } {
   // Reject local paths
-  if (
-    repo.startsWith("/") ||
-    repo.startsWith("~") ||
-    repo.startsWith("./") ||
-    repo.startsWith("..") ||
-    repo === "."
-  ) {
+  if (isLocalPath(repo)) {
     throw new Error(`Not a GitHub repo: "${repo}" (looks like a local path)`);
+  }
+
+  // SSH URL: git@github.com:org/repo[.git]
+  const sshMatch = /^git@github\.com:([^/]+)\/([^/]+?)(?:\.git)?$/.exec(repo);
+  if (sshMatch) {
+    return validateOwnerName(sshMatch[1]!, sshMatch[2]!, repo);
   }
 
   // Full URL: https://github.com/org/repo[.git]

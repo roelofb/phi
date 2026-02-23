@@ -7,6 +7,14 @@ The CLI is the entry point for the harness. It wires together the sandbox, bluep
 ## Interface
 
 ```typescript
+// src/util/github.ts — Repo argument resolution
+
+/** If repo is a local path, resolve to owner/repo via git origin remote. Pass-through otherwise. */
+export function resolveRepoArg(repo: string): Promise<string>;
+
+/** Parse owner/repo, GitHub URL, or SSH URL into { owner, name }. */
+export function parseGitHubRepo(repo: string): { owner: string; name: string };
+
 // src/cli.ts — CLI entry point using citty
 
 // Commands:
@@ -58,6 +66,18 @@ export const selfBuild: Blueprint;
 - Node.js built-ins: `fs/promises`, `path`, `process`
 
 ## Behaviour
+
+### CLI — repo resolution
+
+**Given**: `--repo` is a local path (`.`, `./foo`, `/abs/path`)
+**When**: `harness run` is executed
+**Then**: the CLI resolves the path to `owner/repo` via `git remote get-url origin` before passing to `runHarness()`
+
+**Given**: `--repo` is already `owner/repo` or a GitHub URL
+**When**: `harness run` is executed
+**Then**: the value is passed through unchanged
+
+**Rationale**: Users run from inside a repo. Forcing them to type the GitHub slug is friction. The CLI layer resolves; `runHarness()` always receives a GitHub reference.
 
 ### CLI — run command
 
@@ -151,6 +171,9 @@ export const selfBuild: Blueprint;
 9. AC-9: `bug-fix` blueprint has correct node sequence
 10. AC-10: `self-build` blueprint has correct node sequence
 11. AC-11: Sandbox teardown runs even on blueprint failure
+12. AC-12: `--repo .` resolves to `owner/repo` via git origin remote
+13. AC-13: `--repo owner/repo` passes through unchanged
+14. AC-14: SSH remote URLs (`git@github.com:owner/repo.git`) are parsed correctly
 
 ## Test Scenarios
 
