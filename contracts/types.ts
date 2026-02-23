@@ -47,6 +47,14 @@ export interface RunReport {
   tokenUsage: TokenUsage;
   push: boolean;
   branch?: string;
+  pushResult?: PushResult;
+}
+
+/** Outcome of the push+PR flow */
+export interface PushResult {
+  pushed: boolean;
+  prUrl?: string;
+  error?: string;
 }
 
 /** Options for spawning a subprocess */

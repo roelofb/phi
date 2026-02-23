@@ -1,6 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { createLocalSandbox } from "../src/sandbox/local.js";
-import { createDaytonaSandbox } from "../src/sandbox/daytona.js";
 import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -201,10 +200,3 @@ describe("assertPathConfined", () => {
   });
 });
 
-describe("createDaytonaSandbox", () => {
-  test("throws not yet implemented", async () => {
-    await expect(
-      createDaytonaSandbox({ repo: "test", branch: "test" }),
-    ).rejects.toThrow(/not yet implemented/i);
-  });
-});

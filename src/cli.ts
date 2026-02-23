@@ -6,6 +6,7 @@ import { join, resolve } from "node:path";
 import { runHarness } from "./harness.js";
 import { createConsoleReporter } from "./reporter/console.js";
 import type { Blueprint } from "./blueprint/types.js";
+import type { DaytonaOptions } from "./sandbox/types.js";
 
 async function loadBlueprint(name: string): Promise<Blueprint> {
   const bpDir = resolve(import.meta.dirname ?? ".", "../blueprints");
@@ -75,15 +76,33 @@ const run = defineCommand({
   async run({ args }) {
     const bp = await loadBlueprint(args.blueprint);
     const reporter = createConsoleReporter(process.env as Record<string, string>);
+
+    const githubToken = process.env["GITHUB_TOKEN"];
+    const daytonaApiKey = process.env["DAYTONA_API_KEY"];
+    const daytona: DaytonaOptions | undefined = daytonaApiKey
+      ? {
+          apiKey: daytonaApiKey,
+          apiUrl: process.env["DAYTONA_API_URL"],
+          target: process.env["DAYTONA_TARGET"],
+        }
+      : undefined;
+
+    const sandboxType = args.sandbox;
+    if (sandboxType !== "local" && sandboxType !== "daytona") {
+      throw new Error(`Invalid sandbox type: "${sandboxType}" (expected: local, daytona)`);
+    }
+
     const report = await runHarness({
       blueprint: bp,
       repo: args.repo,
       intent: args.intent,
       push: args.push,
-      sandboxType: args.sandbox as "local" | "daytona",
+      sandboxType,
       runId: args["run-id"],
       reporter,
       specPath: args.spec,
+      githubToken,
+      daytona,
     });
 
     process.exit(

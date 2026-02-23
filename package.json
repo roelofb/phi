@@ -23,6 +23,7 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
+    "@daytonaio/sdk": "^0.144.0",
     "citty": "^0.2.1"
   }
 }

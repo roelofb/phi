@@ -38,6 +38,15 @@ export function createConsoleReporter(
       if (report.branch) {
         process.stderr.write(`Branch:    ${report.branch}\n`);
       }
+      if (report.pushResult) {
+        if (report.pushResult.pushed && report.pushResult.prUrl) {
+          process.stderr.write(`PR:        ${report.pushResult.prUrl}\n`);
+        } else if (report.pushResult.pushed && report.pushResult.error) {
+          process.stderr.write(`Push:      pushed (PR failed: ${sanitize(report.pushResult.error)})\n`);
+        } else if (!report.pushResult.pushed) {
+          process.stderr.write(`Push:      failed (${sanitize(report.pushResult.error ?? "unknown")})\n`);
+        }
+      }
       process.stderr.write("\nNodes:\n");
       for (const node of report.nodes) {
         const icon = node.status === "success" ? "+" : node.status === "skipped" ? "-" : "x";
