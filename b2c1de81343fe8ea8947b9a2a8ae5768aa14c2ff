@@ -1,0 +1,36 @@
+CLAUDE.md
+  e310ddefe563184c 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "b2c1de81343fe8ea8947b9a2a8ae5768aa14c2ff",
+  "prompts": {
+    "868c61be0b922514": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1407311c-cd32-4328-999b-ae2f67fda406",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Roelof Blom <roelof@rb2.nl>",
+      "messages": [],
+      "total_additions": 472,
+      "total_deletions": 0,
+      "accepted_lines": 472,
+      "overriden_lines": 0
+    },
+    "e310ddefe563184c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4bddffef-a6cd-41fa-ae46-6fec43dfedd1",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Roelof Blom <roelof@rb2.nl>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 132,
+      "overriden_lines": 0
+    }
+  }
+}
