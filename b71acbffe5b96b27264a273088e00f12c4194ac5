@@ -1,0 +1,103 @@
+docs/product-specs/daytona-sandbox.md
+  1f956ab764f938b5 1-44,50-82,107-155,157-164,166-206,208-228,237-319,351-355,358-534,571-653,655-656,659-663,666-667,669-718,720-724,729-730,733-734,736-738,740-761,772-775,781-782,785-807,811-856
+  4e5da708471e5c2c 45-49,83-106,156,165,207,229-236,320-350,356-357,535-570,654,657-658,664-665,668,719,725-728,731-732,735,739,762-771,776-780,783-784,808-810
+tests/harness-push.test.ts
+  1bc11a0e26dc294a 1-158
+src/sandbox/types.ts
+  1bc11a0e26dc294a 18-34,42-45
+src/reporter/console.ts
+  1bc11a0e26dc294a 41-49
+tests/shell-quote.test.ts
+  1bc11a0e26dc294a 1-34
+src/harness.ts
+  1bc11a0e26dc294a 1,5,15,29-32,46-47,128-133,139,147-231,233-235
+src/util/shell.ts
+  a8aefb8d201a69e0 1-8
+src/cli.ts
+  1bc11a0e26dc294a 9,79-94,100,104-105
+tests/github-util.test.ts
+  1bc11a0e26dc294a 1-44
+src/util/github.ts
+  1bc11a0e26dc294a 1-2,26,41-50
+  a8aefb8d201a69e0 3-25,27-40,51-53
+contracts/types.ts
+  1bc11a0e26dc294a 50-57
+tests/daytona-sandbox.test.ts
+  1bc11a0e26dc294a 1-161
+src/sandbox/daytona.ts
+  1bc11a0e26dc294a 1-4,6-9,11-12,15,17-104,106-177
+tests/daytona-sandbox.integration.test.ts
+  1bc11a0e26dc294a 1-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "b71acbffe5b96b27264a273088e00f12c4194ac5",
+  "prompts": {
+    "1bc11a0e26dc294a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "229e4320-a9f6-4dc3-8d36-f7f9b99abf71",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Roelof Blom <roelof@rb2.nl>",
+      "messages": [],
+      "total_additions": 1444,
+      "total_deletions": 216,
+      "accepted_lines": 1252,
+      "overriden_lines": 1
+    },
+    "1f956ab764f938b5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "79431f79-5862-4bc4-ab86-b525544f7c72",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Roelof Blom <roelof@rb2.nl>",
+      "messages": [],
+      "total_additions": 813,
+      "total_deletions": 84,
+      "accepted_lines": 712,
+      "overriden_lines": 0
+    },
+    "4e5da708471e5c2c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "539abe15-acca-49ab-ad38-930b7851b6ee",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Roelof Blom <roelof@rb2.nl>",
+      "messages": [],
+      "total_additions": 149,
+      "total_deletions": 22,
+      "accepted_lines": 144,
+      "overriden_lines": 0
+    },
+    "a8aefb8d201a69e0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "318f3902-f778-4dc1-8734-2513a38d935f",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Roelof Blom <roelof@rb2.nl>",
+      "messages": [],
+      "total_additions": 52,
+      "total_deletions": 0,
+      "accepted_lines": 48,
+      "overriden_lines": 0
+    },
+    "e310ddefe563184c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4bddffef-a6cd-41fa-ae46-6fec43dfedd1",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Roelof Blom <roelof@rb2.nl>",
+      "messages": [],
+      "total_additions": 134,
+      "total_deletions": 0,
+      "accepted_lines": 132,
+      "overriden_lines": 2
+    }
+  }
+}
