@@ -1,0 +1,25 @@
+docs/ideas/competitive-lanes.md
+  868c61be0b922514 1-157
+docs/ideas/agentic-dx-manifesto.md
+  868c61be0b922514 1-315
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "bf5e7c50381e7477f98579850b09974b4dd19aad",
+  "prompts": {
+    "868c61be0b922514": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1407311c-cd32-4328-999b-ae2f67fda406",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Roelof Blom <roelof@rb2.nl>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 472,
+      "overriden_lines": 0
+    }
+  }
+}
